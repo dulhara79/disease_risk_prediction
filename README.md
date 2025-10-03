@@ -1,4 +1,4 @@
-# 🏥 Disease Risk Prediction System
+# Disease Risk Prediction System 🏥 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -14,7 +14,7 @@ A comprehensive full-stack machine learning application that predicts disease ri
 
 ## 🎯 Project Overview
 
-This application analyzes 23 different health and lifestyle parameters to predict the probability of disease occurrence. The system uses a **LightGBM** model trained on processed health data with feature engineering and preprocessing.
+This application analyzes different health and lifestyle parameters to predict the probability of disease occurrence. The system uses a **LightGBM** model trained on processed health data with feature engineering and preprocessing.
 
 ## ✨ Key Features
 
