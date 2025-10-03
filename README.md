@@ -8,8 +8,6 @@
 
 A comprehensive full-stack machine learning application that predicts disease risk based on health metrics, lifestyle factors, and personal data. Built with modern web technologies and advanced ML preprocessing pipelines.
 
-## 📸 Screenshot
-
 ![Disease Risk Prediction Interface](https://via.placeholder.com/800x600/4F46E5/FFFFFF?text=Disease+Risk+Prediction+Interface)
 
 ## 🎯 Project Overview
