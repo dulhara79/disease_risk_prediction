@@ -16,7 +16,7 @@ const FIELD_DEFINITIONS = {
     { id: 'heart_rate', label: 'Heart Rate (BPM)', type: 'number', min: 40, max: 150, placeholder: 'e.g., 82' },
     { id: 'glucose', label: 'Glucose (mg/dL)', type: 'number', min: 60, max: 400, placeholder: 'e.g., 110' },
     { id: 'insulin', label: 'Insulin (μU/mL)', type: 'number', min: 1, max: 50, step: 0.1, placeholder: 'e.g., 12.5' },
-    { id: 'cholesterol', label: 'Total Cholesterol (mg/dL)', type: 'number', min: 100, max: 400, placeholder: 'e.g., 210.5' },
+    { id: 'cholesterol', label: 'Total Cholesterol (mg/dL)', type: 'number', min: 100, max: 400, step: 0.1, placeholder: 'e.g., 210.5' },
     { id: 'mental_health_score', label: 'Mental Health Score (1-100)', type: 'number', min: 1, max: 100, placeholder: 'e.g., 78' },
   ],
   'Physical Measurements': [
@@ -40,7 +40,7 @@ const FIELD_DEFINITIONS = {
 };
 
 const round = (value, decimals) => {
-    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+  return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
 };
 
 const initialFormData = Object.values(FIELD_DEFINITIONS).flat().reduce((acc, field) => {
