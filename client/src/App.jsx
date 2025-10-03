@@ -3,40 +3,44 @@ import { Loader, BarChart, Heart, Activity, DollarSign, Users, XCircle, CheckCir
 
 // --- Configuration and Constants ---
 
-// The backend URL is hardcoded here for testing. Update this when deploying your Flask server.
-const API_ENDPOINT = 'http://localhost:5000/predict'; 
+// The backend URL - update this when deploying your Flask server.
+const API_ENDPOINT = 'http://127.0.0.1:8000/predict';
 
 // Define the fields required by the backend, categorized for better UI flow.
-// NOTE: These fields have been updated to match the model's requirements (e.g., 
-// including calorie_intake and waist_size, and changing 'physical_activity_level' to 'physical_activity')
+// These fields MUST match exactly with USER_INPUT_COLUMNS in the backend config.py
 const FIELD_DEFINITIONS = {
-  'Vitals & Metrics': [
+  'Personal Information': [
+    { id: 'gender', label: 'Gender', type: 'select', options: ['Male', 'Female'] },
     { id: 'age', label: 'Age (Years)', type: 'number', min: 18, max: 100, placeholder: 'e.g., 45' },
-    { id: 'bmi', label: 'BMI', type: 'number', min: 15, max: 50, step: 0.1, placeholder: 'e.g., 25.5' },
-    { id: 'blood_pressure', label: 'Blood Pressure (Systolic)', type: 'number', min: 90, max: 180, placeholder: 'e.g., 120' },
-    { id: 'heart_rate', label: 'Heart Rate (BPM)', type: 'number', min: 40, max: 150, placeholder: 'e.g., 72' },
-    { id: 'glucose', label: 'Glucose (mg/dL)', type: 'number', min: 60, max: 400, placeholder: 'e.g., 95' },
-    { id: 'insulin', label: 'Insulin ($\mu$U/mL)', type: 'number', min: 1, max: 50, step: 0.1, placeholder: 'e.g., 8.0' },
-    { id: 'cholesterol', label: 'Total Cholesterol (mg/dL)', type: 'number', min: 100, max: 300, placeholder: 'e.g., 200' },
-    { id: 'waist_size', label: 'Waist Size (Inches)', type: 'number', min: 20, max: 60, placeholder: 'e.g., 34' }, // <-- ADDED
-    // 'triglycerides', 'hdl', 'ldl' were removed as they were "unseen" by the model
-  ],
-  'Lifestyle & Habits': [
-    { id: 'physical_activity', label: 'Physical Activity (Hours/Week)', type: 'number', min: 0, max: 40, step: 0.5, placeholder: 'e.g., 5' }, // <-- UPDATED name
-    { id: 'stress_level', label: 'Stress Level (1-10)', type: 'number', min: 1, max: 10, placeholder: 'e.g., 6' },
-    { id: 'mental_health_score', label: 'Mental Health Score (1-10)', type: 'number', min: 1, max: 10, placeholder: 'e.g., 8' }, // <-- ADDED
-    { id: 'calorie_intake', label: 'Calorie Intake (Daily)', type: 'number', min: 1000, max: 5000, placeholder: 'e.g., 2000' }, // <-- ADDED
-    { id: 'sugar_intake', label: 'Sugar Intake (Grams/Day)', type: 'number', min: 0, max: 200, placeholder: 'e.g., 45' }, // <-- ADDED
-    { id: 'smoking_status', label: 'Smoking Status', type: 'select', options: ['Non-smoker', 'Former Smoker', 'Current Smoker'] },
-    { id: 'alcohol_consumption', label: 'Alcohol Consumption', type: 'select', options: ['None', 'Light', 'Moderate', 'Heavy'] },
-    { id: 'exercise_type', label: 'Primary Exercise', type: 'select', options: ['Running', 'Weightlifting', 'Yoga', 'Swimming', 'Cycling', 'Undefined'] },
-    { id: 'dietary_habits', label: 'Dietary Habits', type: 'select', options: ['Balanced', 'High-Carb', 'Low-Carb', 'Vegetarian', 'Vegan'] },
-    { id: 'caffeine_intake', label: 'Caffeine Intake', type: 'select', options: ['None', 'Low', 'Medium', 'High', 'Unknown'] },
-  ],
-  'Socioeconomic': [
-    { id: 'gender', label: 'Gender', type: 'select', options: ['Male', 'Female', 'Other'] },
-    { id: 'income', label: 'Annual Income ($)', type: 'number', min: 0, max: 500000, placeholder: 'e.g., 75000' },
+    { id: 'income', label: 'Annual Income ($)', type: 'number', min: 0, max: 500000, placeholder: 'e.g., 65000' },
     { id: 'marital_status', label: 'Marital Status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed'] },
+    { id: 'work_hours', label: 'Work Hours (per week)', type: 'number', min: 0, max: 80, placeholder: 'e.g., 45' },
+  ],
+  'Health Vitals': [
+    { id: 'blood_pressure', label: 'Blood Pressure (Systolic)', type: 'number', min: 90, max: 200, placeholder: 'e.g., 135' },
+    { id: 'heart_rate', label: 'Heart Rate (BPM)', type: 'number', min: 40, max: 150, placeholder: 'e.g., 82' },
+    { id: 'glucose', label: 'Glucose (mg/dL)', type: 'number', min: 60, max: 400, placeholder: 'e.g., 110' },
+    { id: 'insulin', label: 'Insulin (μU/mL)', type: 'number', min: 1, max: 50, step: 0.1, placeholder: 'e.g., 12.5' },
+    { id: 'cholesterol', label: 'Total Cholesterol (mg/dL)', type: 'number', min: 100, max: 400, placeholder: 'e.g., 210.5' },
+    { id: 'mental_health_score', label: 'Mental Health Score (1-100)', type: 'number', min: 1, max: 100, placeholder: 'e.g., 78' },
+  ],
+  'Physical Measurements': [
+    { id: 'bmi', label: 'BMI', type: 'number', min: 15, max: 50, step: 0.1, placeholder: 'e.g., 28.5' },
+    { id: 'waist_size', label: 'Waist Size (cm)', type: 'number', min: 50, max: 150, step: 0.1, placeholder: 'e.g., 95.0' },
+    { id: 'physical_activity', label: 'Physical Activity (Hours/Week)', type: 'number', min: 0, max: 40, step: 0.5, placeholder: 'e.g., 5' },
+  ],
+  'Lifestyle & Diet': [
+    { id: 'calorie_intake', label: 'Daily Calorie Intake', type: 'number', min: 1000, max: 5000, placeholder: 'e.g., 2200' },
+    { id: 'sugar_intake', label: 'Sugar Intake (Grams/Day)', type: 'number', min: 0, max: 200, step: 0.1, placeholder: 'e.g., 55.0' },
+    { id: 'water_intake', label: 'Water Intake (Liters/Day)', type: 'number', min: 0, max: 10, step: 0.1, placeholder: 'e.g., 2.5' },
+    { id: 'dietary_habits', label: 'Dietary Habits', type: 'select', options: ['Balanced', 'High-Carb', 'Low-Carb', 'Vegetarian', 'Vegan', 'Keto'] },
+    { id: 'exercise_type', label: 'Primary Exercise Type', type: 'select', options: ['Cardio', 'Strength', 'Mixed', 'Yoga', 'Swimming', 'Cycling', 'Undefined'] },
+  ],
+  'Habits & Stress': [
+    { id: 'smoking_status', label: 'Smoking Status', type: 'select', options: ['Never', 'Former Smoker', 'Current Smoker', 'Heavy Smoker'] },
+    { id: 'alcohol_consumption', label: 'Alcohol Consumption', type: 'select', options: ['Not Drinking', 'Occasionally', 'Moderate', 'Regularly', 'Frequently'] },
+    { id: 'caffeine_intake', label: 'Caffeine Intake', type: 'select', options: ['None', '1 cup daily', '2 cups daily', '3+ cups daily', 'High', 'Moderate', 'Unknown'] },
+    { id: 'stress_level', label: 'Stress Level', type: 'select', options: ['Low', 'Medium', 'High'] },
   ],
 };
 
@@ -56,9 +60,11 @@ const initialFormData = Object.values(FIELD_DEFINITIONS).flat().reduce((acc, fie
 
 const SectionIcon = ({ category }) => {
   const icons = {
-    'Vitals & Metrics': Heart,
-    'Lifestyle & Habits': Activity,
-    'Socioeconomic': DollarSign,
+    'Personal Information': Users,
+    'Health Vitals': Heart,
+    'Physical Measurements': TrendingUp,
+    'Lifestyle & Diet': Activity,
+    'Habits & Stress': AlertTriangle,
   };
   const Icon = icons[category] || BarChart;
   return <Icon className="w-6 h-6 text-indigo-400" />;
