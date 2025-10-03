@@ -71,4 +71,4 @@ if __name__ == '__main__':
 
     print("Starting Flask server...")
     # You would typically use gunicorn or similar for production
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8000)

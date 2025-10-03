@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend & Backend Test</title>
+</head>
+<body>
+    <h1>Disease Risk Prediction - Test Summary</h1>
+    
+    <h2>✅ Backend API Status</h2>
+    <p><strong>Status:</strong> Fixed and Running</p>
+    <p><strong>Endpoint:</strong> <a href="http://127.0.0.1:8000/predict">http://127.0.0.1:8000/predict</a></p>
+    <p><strong>Issues Fixed:</strong></p>
+    <ul>
+        <li>✅ Model file paths corrected</li>
+        <li>✅ Column ordering for StandardScaler fixed</li>
+        <li>✅ Feature mapping for categorical variables implemented</li>
+        <li>✅ stress_level conversion to numerical values added</li>
+    </ul>
+
+    <h2>✅ Frontend Status</h2>
+    <p><strong>Status:</strong> Updated and Running</p>
+    <p><strong>URL:</strong> <a href="http://localhost:5173">http://localhost:5173</a></p>
+    <p><strong>Updates Made:</strong></p>
+    <ul>
+        <li>✅ Added all 23 required fields that match backend exactly</li>
+        <li>✅ Reorganized form into logical sections</li>
+        <li>✅ Updated field types and validation ranges</li>
+        <li>✅ Fixed API endpoint URL</li>
+        <li>✅ Enhanced dropdown options to match backend expectations</li>
+    </ul>
+
+    <h2>🎯 Test Data (Same as Postman)</h2>
+    <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px;">
+{
+    "gender": "Male",
+    "age": 45,
+    "blood_pressure": 135,
+    "heart_rate": 82,
+    "glucose": 110,
+    "insulin": 12.5,
+    "cholesterol": 210.5,
+    "bmi": 28.5,
+    "physical_activity": 5,
+    "waist_size": 95.0,
+    "calorie_intake": 2200,
+    "mental_health_score": 78,
+    "sugar_intake": 55.0,
+    "smoking_status": "Former Smoker",
+    "alcohol_consumption": "Moderate",
+    "stress_level": "Medium",
+    "income": 65000.0,
+    "marital_status": "Married",
+    "exercise_type": "Cardio",
+    "dietary_habits": "Balanced",
+    "caffeine_intake": "2 cups daily",
+    "water_intake": 2.5,
+    "work_hours": 45
+}
+    </pre>
+
+    <h2>🎉 Expected Result</h2>
+    <pre style="background: #e8f5e8; padding: 10px; border-radius: 5px;">
+{
+    "prediction_label": "Disease", 
+    "probability_of_disease": 0.7839
+}
+    </pre>
+
+    <h2>📋 How to Test</h2>
+    <ol>
+        <li>Open the frontend at <a href="http://localhost:5173">http://localhost:5173</a></li>
+        <li>Fill in the form with the test data above</li>
+        <li>Click "Predict Disease Risk"</li>
+        <li>You should see the prediction result without any errors</li>
+    </ol>
+
+    <h2>🔧 Field Mapping Details</h2>
+    <p>The frontend now includes intelligent mapping between user-friendly terms and model expectations:</p>
+    <ul>
+        <li><strong>smoking_status</strong>: "Former Smoker" → "Non-smoker" (for model)</li>
+        <li><strong>dietary_habits</strong>: "Balanced" → "Omnivore" (for model)</li>
+        <li><strong>stress_level</strong>: "Medium" → 2 (numerical conversion)</li>
+        <li><strong>Missing features</strong>: Default values added (sleep_quality, occupation, etc.)</li>
+    </ul>
+
+    <script>
+        console.log('Frontend and Backend are now synchronized! 🎉');
+    </script>
+</body>
+</html>
