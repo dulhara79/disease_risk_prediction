@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Loader, BarChart, Heart, Activity, DollarSign, Users, XCircle, CheckCircle, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Loader, BarChart, Heart, Activity, DollarSign, Users, XCircle, CheckCircle, TrendingUp, AlertTriangle, Sparkles, Shield } from 'lucide-react';
 
-// --- Configuration and Constants ---
-
-// The backend URL - update this when deploying your Flask server.
 const API_ENDPOINT = 'http://127.0.0.1:8000/predict';
 
-// Define the fields required by the backend, categorized for better UI flow.
-// These fields MUST match exactly with USER_INPUT_COLUMNS in the backend config.py
 const FIELD_DEFINITIONS = {
   'Personal Information': [
     { id: 'gender', label: 'Gender', type: 'select', options: ['Male', 'Female'] },
@@ -44,19 +39,14 @@ const FIELD_DEFINITIONS = {
   ],
 };
 
-// Utility function for rounding
 const round = (value, decimals) => {
     return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
 };
 
-// Initial state derived from field definitions
 const initialFormData = Object.values(FIELD_DEFINITIONS).flat().reduce((acc, field) => {
   acc[field.id] = field.type === 'number' ? '' : field.options?.[0] || '';
   return acc;
 }, {});
-
-
-// --- Utility Components ---
 
 const SectionIcon = ({ category }) => {
   const icons = {
@@ -67,28 +57,37 @@ const SectionIcon = ({ category }) => {
     'Habits & Stress': AlertTriangle,
   };
   const Icon = icons[category] || BarChart;
-  return <Icon className="w-6 h-6 text-indigo-400" />;
+  return <Icon className="w-6 h-6 text-white" />;
 };
 
 const CustomInput = ({ field, value, onChange }) => (
-  <div className="flex flex-col space-y-1">
-    <label htmlFor={field.id} className="text-sm font-medium text-gray-700 flex justify-between items-center">
-      {field.label}
-      {field.type === 'number' && field.id !== 'income' && <span className="text-xs font-normal text-gray-500">({field.min}-{field.max})</span>}
+  <div className="flex flex-col space-y-2 group">
+    <label htmlFor={field.id} className="text-sm font-semibold text-gray-700 flex justify-between items-center">
+      <span className="flex items-center gap-2">
+        {field.label}
+      </span>
+      {field.type === 'number' && field.id !== 'income' && <span className="text-xs font-normal text-gray-400">({field.min}-{field.max})</span>}
     </label>
     {field.type === 'select' ? (
-      <select
-        id={field.id}
-        name={field.id}
-        value={value}
-        onChange={onChange}
-        required
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out bg-white appearance-none"
-      >
-        {field.options.map(option => (
-          <option key={option} value={option}>{option}</option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          id={field.id}
+          name={field.id}
+          value={value}
+          onChange={onChange}
+          required
+          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white appearance-none cursor-pointer hover:border-purple-300"
+        >
+          {field.options.map(option => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
     ) : (
       <input
         id={field.id}
@@ -101,7 +100,7 @@ const CustomInput = ({ field, value, onChange }) => (
         step={field.step || (field.id === 'bmi' || field.id === 'insulin' || field.id === 'physical_activity' ? 0.1 : 1)}
         placeholder={field.placeholder}
         required
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:border-purple-300"
       />
     )}
   </div>
@@ -109,58 +108,74 @@ const CustomInput = ({ field, value, onChange }) => (
 
 const RiskGauge = ({ probability }) => {
   const risk = probability * 100;
-  const circumference = 2 * Math.PI * 45; // r=45
+  const circumference = 2 * Math.PI * 54;
   const offset = circumference - (risk / 100) * circumference;
 
-  let color = 'text-green-500'; // Low Risk
+  let gradient = 'from-green-400 to-emerald-500';
+  let shadowColor = 'shadow-green-500/50';
   let label = 'Low Risk';
+  let icon = <Shield className="w-6 h-6 text-green-500" />;
+  
   if (risk > 33) {
-    color = 'text-yellow-500'; // Moderate Risk
+    gradient = 'from-yellow-400 to-orange-500';
+    shadowColor = 'shadow-yellow-500/50';
     label = 'Moderate Risk';
+    icon = <AlertTriangle className="w-6 h-6 text-yellow-500" />;
   }
   if (risk > 66) {
-    color = 'text-red-500'; // High Risk
+    gradient = 'from-red-400 to-rose-600';
+    shadowColor = 'shadow-red-500/50';
     label = 'High Risk';
+    icon = <AlertTriangle className="w-6 h-6 text-red-500" />;
   }
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-28 h-28">
-        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-          {/* Track */}
-          <circle
-            cx="50"
-            cy="50"
-            r="45"
-            fill="none"
-            stroke="#E5E7EB"
-            strokeWidth="8"
-          />
-          {/* Gauge Arc */}
-          <circle
-            cx="50"
-            cy="50"
-            r="45"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="8"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            strokeLinecap="round"
-            className={`transition-all duration-1000 ease-out ${color}`}
-          />
-        </svg>
-        <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
-          <span className={`text-xl font-bold ${color}`}>{Math.round(risk)}%</span>
-          <span className="text-xs text-gray-500">Risk</span>
+      <div className={`relative w-40 h-40 rounded-full bg-gradient-to-br ${gradient} p-1 shadow-2xl ${shadowColor} animate-pulse-slow`}>
+        <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
+          <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={risk > 66 ? "#f87171" : risk > 33 ? "#fbbf24" : "#34d399"} />
+                <stop offset="100%" stopColor={risk > 66 ? "#dc2626" : risk > 33 ? "#f97316" : "#10b981"} />
+              </linearGradient>
+            </defs>
+            <circle
+              cx="60"
+              cy="60"
+              r="54"
+              fill="none"
+              stroke="#f3f4f6"
+              strokeWidth="8"
+            />
+            <circle
+              cx="60"
+              cy="60"
+              r="54"
+              fill="none"
+              stroke="url(#gaugeGradient)"
+              strokeWidth="8"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+              className="transition-all duration-1000 ease-out"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className={`text-3xl font-black bg-gradient-to-br ${gradient} bg-clip-text text-transparent`}>
+              {Math.round(risk)}%
+            </span>
+            <span className="text-xs text-gray-400 font-medium mt-1">Risk Score</span>
+          </div>
         </div>
       </div>
-      <p className={`mt-2 text-lg font-semibold ${color}`}>{label}</p>
+      <div className="mt-4 flex items-center gap-2">
+        {icon}
+        <p className={`text-xl font-bold bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>{label}</p>
+      </div>
     </div>
   );
 };
-
-// --- Main Application Component ---
 
 export default function App() {
   const [formData, setFormData] = useState(initialFormData);
@@ -168,7 +183,6 @@ export default function App() {
   const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState(null);
 
-  // Simple animation hook for the loader
   useEffect(() => {
     if (loading) {
       document.body.style.cursor = 'wait';
@@ -180,7 +194,6 @@ export default function App() {
   const handleChange = (e) => {
     const { name, value, type } = e.target;
     
-    // Convert numeric inputs to numbers or keep as empty string if invalid
     let processedValue = value;
     if (type === 'number') {
         const floatValue = parseFloat(value);
@@ -189,7 +202,7 @@ export default function App() {
         } else if (value === '') {
             processedValue = '';
         } else {
-            return; // Ignore non-numeric input for number fields
+            return;
         }
     }
 
@@ -234,7 +247,6 @@ export default function App() {
     setPrediction(null);
     setError(null);
 
-    // Convert all numeric values to number type for the API call
     const payload = Object.keys(formData).reduce((acc, key) => {
         const value = formData[key];
         const fieldDef = Object.values(FIELD_DEFINITIONS).flat().find(f => f.id === key);
@@ -242,7 +254,6 @@ export default function App() {
         acc[key] = fieldDef?.type === 'number' ? parseFloat(value) : value;
         return acc;
     }, {});
-
 
     try {
       const response = await fetch(API_ENDPOINT, {
@@ -256,11 +267,9 @@ export default function App() {
       const data = await response.json();
 
       if (response.ok && data.status === 'success') {
-        // Ensure probability is a number and round it for display
         const probability = parseFloat(data.probability_of_disease);
         setPrediction({ ...data, probability_of_disease: round(probability, 4) });
       } else {
-        // Handle backend validation/processing errors
         setError(data.error || "Prediction failed due to an unknown backend error.");
       }
     } catch (err) {
@@ -281,55 +290,75 @@ export default function App() {
     if (!prediction) return null;
 
     const isHighRisk = prediction.probability_of_disease > 0.5;
-    const resultColor = isHighRisk ? 'bg-red-500/10 border-red-500' : 'bg-green-500/10 border-green-500';
-    const textColor = isHighRisk ? 'text-red-600' : 'text-green-600';
-    const Icon = isHighRisk ? AlertTriangle : CheckCircle;
+    const risk = prediction.probability_of_disease * 100;
+    
+    let gradient = 'from-green-400 to-emerald-600';
+    let bgPattern = 'from-green-50 to-emerald-50';
+    
+    if (risk > 33) {
+      gradient = 'from-yellow-400 to-orange-600';
+      bgPattern = 'from-yellow-50 to-orange-50';
+    }
+    if (risk > 66) {
+      gradient = 'from-red-400 to-rose-600';
+      bgPattern = 'from-red-50 to-rose-50';
+    }
 
     return (
-      <div className="mt-8 p-6 bg-white rounded-xl shadow-2xl border-2 border-indigo-200 transform transition-all duration-500 animate-fadeInUp">
-        <div className="flex items-center space-x-4 mb-4 pb-4 border-b">
-          <Icon className={`w-8 h-8 ${textColor}`} />
-          <h2 className={`text-2xl font-extrabold tracking-tight ${textColor}`}>
-            Prediction Result
-          </h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          {/* Gauge */}
-          <div className="flex justify-center">
-            <RiskGauge probability={prediction.probability_of_disease} />
+      <div className="mt-12 relative animate-fadeInUp">
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} rounded-3xl blur-2xl opacity-20 animate-pulse-slow`}></div>
+        <div className="relative p-8 bg-white rounded-3xl shadow-2xl border-2 border-gray-100">
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <Sparkles className={`w-8 h-8 bg-gradient-to-br ${gradient} bg-clip-text text-transparent animate-pulse`} />
+            <h2 className={`text-3xl font-black bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>
+              Your Health Analysis
+            </h2>
+            <Sparkles className={`w-8 h-8 bg-gradient-to-br ${gradient} bg-clip-text text-transparent animate-pulse`} />
           </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="flex justify-center">
+              <RiskGauge probability={prediction.probability_of_disease} />
+            </div>
 
-          {/* Details */}
-          <div>
-            {/* FIX: Removed duplicate 'className' attribute */}
-            <div className={`p-4 rounded-lg shadow-inner ${resultColor} border-l-4`}>
-              <p className="text-xl font-bold">Predicted Outcome:</p>
-              <p className={`text-4xl mt-1 font-extrabold ${textColor}`}>{prediction.prediction_label}</p>
-            </div>
-            
-            <div className="mt-4 text-gray-700 space-y-2">
-                <div className="flex justify-between items-center text-lg font-medium">
-                    <span>Probability of Disease:</span>
-                    <span className="font-mono text-indigo-600">{prediction.probability_of_disease}</span>
+            <div className="space-y-6">
+              <div className={`p-6 rounded-2xl bg-gradient-to-br ${bgPattern} border-2 ${isHighRisk ? 'border-red-200' : 'border-green-200'} shadow-lg`}>
+                <p className="text-sm font-semibold text-gray-600 mb-2">Predicted Outcome</p>
+                <p className={`text-4xl font-black bg-gradient-to-br ${gradient} bg-clip-text text-transparent`}>
+                  {prediction.prediction_label}
+                </p>
+              </div>
+              
+              <div className="space-y-4 bg-gray-50 p-6 rounded-2xl border-2 border-gray-100">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-600">Disease Probability</span>
+                  <span className={`text-2xl font-black bg-gradient-to-br ${gradient} bg-clip-text text-transparent`}>
+                    {(prediction.probability_of_disease * 100).toFixed(1)}%
+                  </span>
                 </div>
-                <div className="flex justify-between items-center text-lg font-medium">
-                    <span>Probability of No Disease:</span>
-                    <span className="font-mono text-indigo-600">{round(1 - prediction.probability_of_disease, 4)}</span>
+                <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full bg-gradient-to-r ${gradient} transition-all duration-1000 ease-out rounded-full shadow-lg`}
+                    style={{ width: `${prediction.probability_of_disease * 100}%` }}
+                  ></div>
                 </div>
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-sm font-semibold text-gray-600">Healthy Probability</span>
+                  <span className="text-2xl font-black text-gray-700">
+                    {((1 - prediction.probability_of_disease) * 100).toFixed(1)}%
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        
       </div>
     );
   }, [prediction]);
 
-
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-8 font-inter">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 relative overflow-hidden">
       <style>{`
-        /* Custom Keyframes for Modern Feel */
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
@@ -342,91 +371,134 @@ export default function App() {
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-fadeInUp {
-          animation: fadeInUp 0.5s ease-out;
+          animation: fadeInUp 0.6s ease-out;
+        }
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 3s ease-in-out infinite;
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
         }
       `}</style>
-      <div className="max-w-4xl mx-auto">
-        
-        {/* Header */}
-        <header className="py-8 text-center animate-fadeIn">
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
-            Health Risk Prediction Model
-          </h1>
-          <p className="mt-3 text-xl text-indigo-600">
-            Input subject data to receive a precise disease risk prediction.
-          </p>
-        </header>
-
-        {/* Main Card */}
-        <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-10 rounded-3xl shadow-2xl border border-gray-100 animate-fadeInUp delay-100">
+      
+      <div className="absolute top-0 left-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '4s' }}></div>
+      
+      <div className="relative p-4 sm:p-8">
+        <div className="max-w-6xl mx-auto">
           
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center space-x-3 transition duration-300">
-              <XCircle className="w-5 h-5 flex-shrink-0" />
-              <p className="text-sm font-medium">{error}</p>
+          <header className="py-12 text-center animate-fadeIn">
+            <div className="inline-flex items-center justify-center gap-3 mb-4">
+              <Heart className="w-12 h-12 text-pink-500 animate-pulse" />
+              <h1 className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                Health Risk Predictor
+              </h1>
+              <Activity className="w-12 h-12 text-blue-500 animate-pulse" />
             </div>
-          )}
+            <p className="mt-4 text-xl text-gray-600 font-medium">
+              Advanced AI-powered health analysis for personalized risk assessment
+            </p>
+            
+          </header>
 
-          {/* Input Sections */}
-          <div className="space-y-12">
-            {Object.entries(FIELD_DEFINITIONS).map(([category, fields]) => (
-              <section key={category} className="border-b border-gray-200 pb-8">
-                <div className="flex items-center space-x-3 mb-6">
-                  <SectionIcon category={category} />
-                  <h2 className="text-xl font-bold text-gray-800">{category}</h2>
+          <div className="relative bg-white/90 backdrop-blur-xl p-8 sm:p-12 rounded-3xl shadow-2xl border-2 border-white/50 animate-fadeInUp">
+            
+            {error && (
+              <div className="mb-8 p-5 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 text-red-700 rounded-2xl flex items-center space-x-3 shadow-lg animate-fadeInUp">
+                <XCircle className="w-6 h-6 flex-shrink-0" />
+                <p className="text-sm font-semibold">{error}</p>
+              </div>
+            )}
+
+            <div className="space-y-10">
+              {Object.entries(FIELD_DEFINITIONS).map(([category, fields], idx) => {
+                const gradients = [
+                  'from-purple-500 to-pink-500',
+                  'from-pink-500 to-rose-500',
+                  'from-blue-500 to-cyan-500',
+                  'from-green-500 to-emerald-500',
+                  'from-orange-500 to-red-500',
+                ];
+                const gradient = gradients[idx % gradients.length];
+                
+                return (
+                  <section key={category} className="group">
+                    <div className={`flex items-center gap-4 mb-6 p-4 rounded-2xl bg-gradient-to-r ${gradient} shadow-lg transform transition-all duration-300 hover:scale-[1.02]`}>
+                      <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+                        <SectionIcon category={category} />
+                      </div>
+                      <h2 className="text-2xl font-black text-white">{category}</h2>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pl-4">
+                      {fields.map(field => (
+                        <CustomInput
+                          key={field.id}
+                          field={field}
+                          value={formData[field.id] ?? ''}
+                          onChange={handleChange}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+
+            <div className="mt-12 flex flex-col sm:flex-row justify-center gap-4">
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={loading}
+                className="group px-8 py-4 border-2 border-gray-300 rounded-2xl text-gray-700 font-bold shadow-lg hover:shadow-xl hover:border-gray-400 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 bg-white transform hover:scale-105 active:scale-95"
+              >
+                <XCircle className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                Reset Form
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading}
+                className="group relative px-8 py-4 rounded-2xl text-white font-bold shadow-xl bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:shadow-2xl transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-3 transform hover:scale-105 active:scale-95 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center gap-3">
+                  {loading ? (
+                    <>
+                      <Loader className="w-6 h-6 animate-spin" />
+                      <span className="text-lg">Analyzing Data...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-6 h-6" />
+                      <span className="text-lg">Get Prediction</span>
+                      <TrendingUp className="w-6 h-6" />
+                    </>
+                  )}
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {fields.map(field => (
-                    <CustomInput
-                      key={field.id}
-                      field={field}
-                      value={formData[field.id] ?? ''}
-                      onChange={handleChange}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))}
+              </button>
+            </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="mt-10 flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
-            <button
-              type="button"
-              onClick={handleReset}
-              disabled={loading}
-              className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-semibold shadow-sm hover:bg-gray-50 transition duration-150 ease-in-out disabled:opacity-50 flex items-center justify-center"
-            >
-              Reset Data
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 rounded-lg text-white font-semibold shadow-lg bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out disabled:opacity-70 flex items-center justify-center space-x-2 transform hover:scale-[1.01] active:scale-[0.99]"
-            >
-              {loading ? (
-                <>
-                  <Loader className="w-5 h-5 animate-spin" />
-                  <span>Processing Data...</span>
-                </>
-              ) : (
-                <>
-                  <TrendingUp className="w-5 h-5" />
-                  <span>Get Prediction</span>
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+          {renderResult}
 
-        {/* Prediction Results Display */}
-        {renderResult}
-
-        {/* Footer Note */}
-        <footer className="mt-12 text-center text-sm text-gray-500">
-            Disclaimer: This is a predictive tool. Always consult a healthcare professional for a medical diagnosis.
-        </footer>
+          <footer className="mt-16 text-center">
+            <div className="inline-block bg-white/80 backdrop-blur-sm px-8 py-4 rounded-2xl shadow-lg border border-gray-200">
+              <p className="text-sm text-gray-600 font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                <span className="font-semibold">Medical Disclaimer:</span> This is a predictive tool. Always consult healthcare professionals for medical advice.
+              </p>
+            </div>
+          </footer>
+        </div>
       </div>
     </div>
   );
