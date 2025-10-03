@@ -1,0 +1,8 @@
+Flask
+flask-cors
+numpy
+
+# In a real environment, you would also need:
+# joblib
+# lightgbm
+# scikit-learn
