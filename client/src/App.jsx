@@ -4,7 +4,6 @@ import {
   BarChart,
   Heart,
   Activity,
-  DollarSign,
   Users,
   XCircle,
   CheckCircle,
@@ -586,8 +585,14 @@ export default function App() {
   const renderResult = useMemo(() => {
     if (!prediction) return null;
 
+    // probability_of_disease is P(y=0) "No Disease"
     const probNoDisease = prediction.probability_of_disease;
     const probDisease = round(1 - probNoDisease, 4); // P(y=1) "Disease"
+
+    // CORE FIX: Determine the final label based on the calculated probability
+    const finalPredictionLabel = probDisease >= 0.5 ? "Disease" : "No Disease";
+
+    // Risk is high if P(y=1) >= 0.5
     const isHighRisk = probDisease >= 0.5;
 
     const resultColor = isHighRisk
@@ -606,6 +611,7 @@ export default function App() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          {/* Gauge uses the probability of DISEASE (P(y=1)) */}
           <div className="flex justify-center">
             <RiskGauge probabilityOfDisease={probDisease} />
           </div>
@@ -615,17 +621,20 @@ export default function App() {
               className={`p-4 rounded-lg shadow-inner ${resultColor} border-l-4`}
             >
               <p className="text-xl font-bold">Predicted Outcome:</p>
+              {/* Using the corrected label */}
               <p className={`text-4xl mt-1 font-extrabold ${textColor}`}>
-                {prediction.prediction_label}
+                {finalPredictionLabel}
               </p>
             </div>
 
             <div className="mt-4 text-gray-700 space-y-2">
               <div className="flex justify-between items-center text-lg font-medium">
+                {/* Display P(y=1) */}
                 <span>Probability of Disease:</span>
                 <span className="font-mono text-indigo-600">{probDisease}</span>
               </div>
               <div className="flex justify-between items-center text-lg font-medium">
+                {/* Display P(y=0) */}
                 <span>Probability of No Disease:</span>
                 <span className="font-mono text-indigo-600">
                   {probNoDisease}
@@ -672,7 +681,7 @@ export default function App() {
             Health Risk Prediction Model
           </h1>
           <p className="mt-3 text-xl text-indigo-600">
-            Follow the steps below to input your data and get a prediction.
+            Follow the 5 steps below to input your data and get a prediction.
           </p>
         </header>
 
