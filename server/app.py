@@ -17,7 +17,7 @@ except Exception:
     # with a health check that fails. For this example, we proceed but allow 
     # preprocessor.py to handle the runtime error.
 
-CORS(app, resources={r"/predict": {"origins": "http://localhost:5173"}})
+CORS(app, resources={r"/predict": {"origins": ["http://localhost:5173", "https://disease-risk-prediction-frontend.vercel.app/"]}})
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -62,13 +62,13 @@ def predict():
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 
-if __name__ == '__main__':
-    # Ensure all model artifacts are saved in a 'models' directory relative to the app.py
-    # Create the directory if it doesn't exist
-    from config import MODELS_DIR
+# if __name__ == '__main__':
+#     # Ensure all model artifacts are saved in a 'models' directory relative to the app.py
+#     # Create the directory if it doesn't exist
+#     from config import MODELS_DIR
 
-    MODELS_DIR.mkdir(exist_ok=True)
+#     MODELS_DIR.mkdir(exist_ok=True)
 
-    print("Starting Flask server...")
-    # You would typically use gunicorn or similar for production
-    app.run(debug=True, host='0.0.0.0', port=8000)
+#     print("Starting Flask server...")
+#     # You would typically use gunicorn or similar for production
+#     app.run(debug=True, host='0.0.0.0', port=8000)
