@@ -5,3 +5,4 @@ joblib
 pandas
 lightgbm
 scikit-learn
+gunicorn
