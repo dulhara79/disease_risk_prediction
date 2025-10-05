@@ -16,7 +16,7 @@ import {
 // --- Configuration and Constants ---
 
 // The backend URL - update this when deploying your Flask server.
-const API_ENDPOINT = "http://127.0.0.1:8000/predict";
+const API_ENDPOINT = "https://disease-risk-prediction-backend.vercel.app/predict";
 
 // Define the fields required by the backend, categorized for better UI flow.
 // Added 'hint' for user guidance, including clarity on decimals.
