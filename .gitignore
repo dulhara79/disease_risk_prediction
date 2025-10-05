@@ -98,11 +98,11 @@ Desktop.ini
 *.tsv
 *.dat
 
-# Model files
-*.h5
-*.pkl
-*.joblib
-*.pt
+# # Model files
+# *.h5
+# *.pkl
+# *.joblib
+# *.pt
 
 # Images
 *.png
@@ -121,3 +121,4 @@ client/node_modules/
 client/dist/
 client/package-lock.json
 client/.env
+/models
