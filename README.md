@@ -408,3 +408,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 *Made with ❤️ for Data Mining!*
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
