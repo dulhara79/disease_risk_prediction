@@ -17,7 +17,15 @@ except Exception:
     # with a health check that fails. For this example, we proceed but allow 
     # preprocessor.py to handle the runtime error.
 
-CORS(app, resources={r"/predict": {"origins": ["http://localhost:5173", "https://disease-risk-prediction-frontend.vercel.app/"]}})
+# CORS(app, resources={r"/predict": {"origins": ["http://localhost:5173", "https://disease-risk-prediction-frontend.vercel.app/"]}})
+
+FRONTEND_URL = "https://disease-risk-prediction-frontend.vercel.app"
+
+CORS(app, resources={r"/predict": {"origins": [
+    "http://localhost:5173", # Keep for local development
+    FRONTEND_URL,             # Your frontend URL
+    "https://disease-risk-prediction-backend.vercel.app" # The backend URL itself (sometimes necessary)
+]}})
 
 @app.route('/')
 def home():
