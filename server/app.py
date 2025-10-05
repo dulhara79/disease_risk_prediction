@@ -19,6 +19,11 @@ except Exception:
 
 CORS(app, resources={r"/predict": {"origins": ["http://localhost:5173", "https://disease-risk-prediction-frontend.vercel.app/"]}})
 
+@app.route('/')
+def home():
+    """Simple status check for root URL."""
+    return jsonify({"status": "API is operational", "version": "1.0"}), 200
+
 @app.route('/predict', methods=['POST'])
 def predict():
     """
