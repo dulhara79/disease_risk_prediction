@@ -1,6 +1,5 @@
-# 🏥 Disease Risk Prediction System
+# Disease Risk Prediction System 🏥 
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![React](https://img.shields.io/badge/React-19.1.1-blue.svg)](https://reactjs.org/)
 [![Flask](https://img.shields.io/badge/Flask-Latest-green.svg)](https://flask.palletsprojects.com/)
@@ -8,17 +7,11 @@
 
 A comprehensive full-stack machine learning application that predicts disease risk based on health metrics, lifestyle factors, and personal data. Built with modern web technologies and advanced ML preprocessing pipelines.
 
-## 📸 Screenshot
-
 ![Disease Risk Prediction Interface](https://via.placeholder.com/800x600/4F46E5/FFFFFF?text=Disease+Risk+Prediction+Interface)
 
 ## 🎯 Project Overview
 
-This application analyzes 23 different health and lifestyle parameters to predict the probability of disease occurrence. The system uses a **LightGBM** model trained on processed health data with sophisticated feature engineering and preprocessing.
-
-### 🔬 FDM Mini Project
-
-This project is part of a **FDM (Faculty of Data Management)** mini project, demonstrating end-to-end machine learning deployment with modern web technologies.
+This application analyzes different health and lifestyle parameters to predict the probability of disease occurrence. The system uses a **LightGBM** model trained on processed health data with feature engineering and preprocessing.
 
 ## ✨ Key Features
 
@@ -403,38 +396,6 @@ node src/validate_fields.js
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👨‍💻 Author
-
-**Dulhara Kaushalya**
-- GitHub: [@dulhara79](https://github.com/dulhara79)
-- Project: [disease_risk_prediction](https://github.com/dulhara79/disease_risk_prediction)
-
-## 🙏 Acknowledgments
-
-- **FDM Program** for providing the project framework
-- **LightGBM Team** for the excellent gradient boosting library
-- **React Team** for the modern UI framework
-- **Flask Team** for the lightweight web framework
-- **scikit-learn** for comprehensive ML tools
-
-## 🤝 Contributing
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-
-1. Check the [troubleshooting section](#-troubleshooting)
-2. Review the [API documentation](#-api-documentation) 
-3. Open an issue on GitHub
-4. Contact the project maintainer
-
----
 
 <div align="center">
 
@@ -446,4 +407,4 @@ If you encounter any issues or have questions:
 
 ---
 
-*Made with ❤️ for the FDM Mini Project*
+*Made with ❤️ for Data Mining!*
