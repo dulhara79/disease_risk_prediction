@@ -19,20 +19,12 @@ except Exception:
 
 # CORS(app, resources={r"/predict": {"origins": ["http://localhost:5173", "https://disease-risk-prediction-frontend.vercel.app/"]}})
 
-# FRONTEND_URL = "https://disease-risk-prediction-frontend.vercel.app"
-#
-# CORS(app, resources={r"/predict": {"origins": [
-#     "http://localhost:5173", # Keep for local development
-#     FRONTEND_URL,             # Your frontend URL
-#     "https://disease-risk-prediction-backend.vercel.app" # The backend URL itself (sometimes necessary)
-# ]}})
-
 FRONTEND_URL = "https://disease-risk-prediction-frontend.vercel.app"
-BACKEND_URL = "https://disease-backend.up.railway.app"
 
 CORS(app, resources={r"/predict": {"origins": [
-    FRONTEND_URL,
-    BACKEND_URL
+    "http://localhost:5173", # Keep for local development
+    FRONTEND_URL,             # Your frontend URL
+    # The backend URL itself (sometimes necessary)
 ]}})
 
 
