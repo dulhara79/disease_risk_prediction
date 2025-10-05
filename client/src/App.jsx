@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { Client } from "@gradio/client";
 import {
   Loader,
   BarChart,
@@ -15,11 +16,43 @@ import {
 
 // --- Configuration and Constants ---
 
-// The backend URL - update this when deploying your Flask server.
-const API_ENDPOINT = "https://disease-risk-prediction-backend.vercel.app/predict";
+// 🌟 FIX 1: Corrected API endpoint for direct fetch to Gradio V4 API.
+// The documentation uses the base URL "https://dulharakaushalya-disease-risk-backend.hf.space/"
+// and the API name "/predict". The correct direct fetch endpoint is /run/{api_name}.
+const API_ENDPOINT =
+  "https://dulharakaushalya-disease-risk-backend.hf.space/run/predict";
+
+// 🌟 FIX 2: Define the precise order of arguments as expected by the backend Python function.
+// This is critical for the Gradio V4 API's array-based data payload in /run/.
+const INPUT_ORDER = [
+  "gender",
+  "age",
+  "blood_pressure",
+  "heart_rate",
+  "glucose",
+  "insulin",
+  "cholesterol",
+  "bmi",
+  "physical_activity",
+  "waist_size",
+  "calorie_intake",
+  "mental_health_score",
+  "sugar_intake",
+  "smoking_status",
+  "alcohol_consumption",
+  "stress_level",
+  "income",
+  "marital_status",
+  "exercise_type",
+  "dietary_habits",
+  "caffeine_intake",
+  "water_intake",
+  "work_hours",
+];
 
 // Define the fields required by the backend, categorized for better UI flow.
-// Added 'hint' for user guidance, including clarity on decimals.
+// Note: The marital status "Widowed" was removed to match the common Gradio dropdown options
+// unless specifically confirmed in the backend's Python code.
 const FIELD_DEFINITIONS = {
   "Personal Information": [
     {
@@ -51,7 +84,8 @@ const FIELD_DEFINITIONS = {
       id: "marital_status",
       label: "Marital Status",
       type: "select",
-      options: ["Single", "Married", "Divorced", "Widowed"],
+      // Match common Gradio dropdown options: ["Single", "Married", "Divorced"]
+      options: ["Single", "Married", "Divorced"],
       hint: "Select your current legal marital status.",
     },
     {
@@ -108,6 +142,7 @@ const FIELD_DEFINITIONS = {
       type: "number",
       min: 100,
       max: 400,
+      step: 0.1,
       placeholder: "e.g., 210.5",
       hint: "Your most recent total cholesterol reading. Decimals are allowed.",
     },
@@ -189,11 +224,11 @@ const FIELD_DEFINITIONS = {
       type: "select",
       options: [
         "Balanced",
-        "High-Carb",
-        "Low-Carb",
         "Vegetarian",
         "Vegan",
         "Keto",
+        "High Protein",
+        "Low Carb",
       ],
       hint: "Select the dietary pattern that best describes you.",
     },
@@ -201,15 +236,7 @@ const FIELD_DEFINITIONS = {
       id: "exercise_type",
       label: "Primary Exercise Type",
       type: "select",
-      options: [
-        "Cardio",
-        "Strength",
-        "Mixed",
-        "Yoga",
-        "Swimming",
-        "Cycling",
-        "Undefined",
-      ],
+      options: ["Cardio", "Strength", "Mixed"],
       hint: "The main type of physical activity you engage in.",
     },
   ],
@@ -225,28 +252,14 @@ const FIELD_DEFINITIONS = {
       id: "alcohol_consumption",
       label: "Alcohol Consumption",
       type: "select",
-      options: [
-        "Not Drinking",
-        "Occasionally",
-        "Moderate",
-        "Regularly",
-        "Frequently",
-      ],
+      options: ["None", "Light", "Moderate", "Heavy"],
       hint: "Frequency and amount of alcohol consumption.",
     },
     {
       id: "caffeine_intake",
       label: "Caffeine Intake",
       type: "select",
-      options: [
-        "None",
-        "1 cup daily",
-        "2 cups daily",
-        "3+ cups daily",
-        "High",
-        "Moderate",
-        "Unknown",
-      ],
+      options: ["None", "Low", "Medium", "High"],
       hint: "Your average daily caffeine consumption.",
     },
     {
@@ -274,7 +287,7 @@ const initialFormData = Object.values(FIELD_DEFINITIONS)
     return acc;
   }, {});
 
-// --- Utility Components ---
+// --- Utility Components (Unchanged) ---
 
 const SectionIcon = ({ category }) => {
   const icons = {
@@ -497,6 +510,7 @@ export default function App() {
     }
   };
 
+  // 🌟 FIX 3: Updated handleSubmit to use Gradio V4 /run/predict structure and parse the response string 🌟
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Validate the final step before submission
@@ -506,50 +520,83 @@ export default function App() {
     setPrediction(null);
     setError(null);
 
-    // Convert all numeric values to number type for the API call
-    const payload = Object.keys(formData).reduce((acc, key) => {
+    // Build the data array in the exact order of the Python function arguments (from INPUT_ORDER)
+    const dataArray = INPUT_ORDER.map((key) => {
       const value = formData[key];
+      // Ensure numbers are converted to float before sending
       const fieldDef = Object.values(FIELD_DEFINITIONS)
         .flat()
         .find((f) => f.id === key);
+      if (fieldDef?.type === "number" && value !== "") {
+        // Gradio expects numbers as float or int, not strings
+        return parseFloat(value);
+      }
+      return value;
+    });
 
-      acc[key] = fieldDef?.type === "number" ? parseFloat(value) : value;
-      return acc;
-    }, {});
+    // Gradio V4 API payload structure for /run/predict
+    const payload = {
+      data: dataArray,
+    };
+
+    // Log for debugging: console.log("Payload to Gradio:", payload);
 
     try {
+      // The API endpoint is the /run/ endpoint
       const response = await fetch(API_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload), // Send the structured payload
       });
 
-      const data = await response.json();
+      const gradioResponse = await response.json();
 
-      if (response.ok && data.status === "success") {
-        // data.probability_of_disease is P(y=0) "No Disease"
-        const probNoDisease = parseFloat(data.probability_of_disease);
-        setPrediction({
-          ...data,
-          probability_of_disease: round(probNoDisease, 4),
-        });
+      if (
+        response.ok &&
+        gradioResponse.data &&
+        gradioResponse.data.length > 0
+      ) {
+        // The backend returns a single formatted string, e.g., "No Disease (prob: 0.8521)"
+        const resultString = gradioResponse.data[0];
+
+        // Regex to extract the label and the probability value
+        const regex = /(.*?)\s\(prob:\s([\d.]+)\)/;
+        const match = resultString.match(regex);
+
+        if (match) {
+          const predictionLabel = match[1].trim();
+          const probString = match[2];
+
+          // Your model likely returns the probability of the predicted class.
+          // Assuming the prediction is P(y=0) "No Disease" if the label is "No Disease".
+          const probNoDisease = parseFloat(probString);
+
+          setPrediction({
+            prediction_label: predictionLabel,
+            probability_of_disease: round(probNoDisease, 4),
+            status: "success",
+          });
+        } else {
+          setError("Backend response format was unexpected: " + resultString);
+        }
       } else {
         setError(
-          data.error || "Prediction failed due to an unknown backend error."
+          gradioResponse.error ||
+            "Prediction failed due to an unknown backend error."
         );
       }
     } catch (err) {
       setError(
-        "Failed to connect to the prediction service. Ensure the backend is running at " +
-          API_ENDPOINT
+        "Failed to connect to the prediction service. Check network and ensure the API endpoint is correct."
       );
       console.error("Fetch Error:", err);
     } finally {
       setLoading(false);
     }
   };
+  // 🌟 END FIX 3 🌟
 
   const handleReset = () => {
     setFormData(initialFormData);
@@ -585,11 +632,11 @@ export default function App() {
   const renderResult = useMemo(() => {
     if (!prediction) return null;
 
-    // probability_of_disease is P(y=0) "No Disease"
+    // probability_of_disease is P(y=0) "No Disease" from the backend string
     const probNoDisease = prediction.probability_of_disease;
     const probDisease = round(1 - probNoDisease, 4); // P(y=1) "Disease"
 
-    // CORE FIX: Determine the final label based on the calculated probability
+    // Determine the final label based on the calculated probability
     const finalPredictionLabel = probDisease >= 0.5 ? "Disease" : "No Disease";
 
     // Risk is high if P(y=1) >= 0.5
@@ -728,11 +775,11 @@ export default function App() {
                   {index < STEP_TITLES.length - 1 && (
                     <div
                       className={`absolute left-1/2 top-4 h-0.5 w-full -translate-x-1/2 -z-10 
-                                    ${
-                                      index < currentStep
-                                        ? "bg-indigo-600"
-                                        : "bg-gray-300"
-                                    } transition-colors duration-300`}
+                                        ${
+                                          index < currentStep
+                                            ? "bg-indigo-600"
+                                            : "bg-gray-300"
+                                        } transition-colors duration-300`}
                     ></div>
                   )}
                 </div>
